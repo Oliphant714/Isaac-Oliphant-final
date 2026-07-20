@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>D&D Encounter Tracker</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 700px; margin: 40px auto; background: #1a1a2e; color: #eee; }
+  h1 { color: #e94560; }
+  .card { background: #16213e; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .row { display: flex; gap: 8px; margin-bottom: 10px; }
+  input { padding: 6px; border-radius: 4px; border: 1px solid #444; background: #0f172a; color: #eee; flex: 1; }
+  button { padding: 6px 12px; border-radius: 4px; border: none; background: #e94560; color: white; cursor: pointer; }
+  button:hover { background: #c73652; }
+  .combatant { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #2a3a5a; }
+  .combatant.current { background: #2a3a5a; border-left: 4px solid #e94560; }
+  .dead { opacity: 0.4; text-decoration: line-through; }
+  .hp-bar { width: 100px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
+  .hp-fill { height: 100%; background: #4ade80; }
+  .round { color: #aaa; font-size: 0.9em; }
+</style>
+</head>
+<body>
+  <h1>⚔️ D&D Encounter Tracker</h1>
+
+  <div class="card">
+    <div class="row">
+      <input id="encounterName" placeholder="Encounter name (e.g. Goblin Ambush)">
+      <button onclick="createEncounter()">New Encounter</button>
+    </div>
+  </div>
+
+  <div id="encounterView"></div>
+
+  <script>
+    let currentEncounterId = null;
+
+    async function createEncounter() {
+      const name = document.getElementById('encounterName').value || 'Unnamed Encounter';
+      const res = await fetch('/encounters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      const data = await res.json();
+      currentEncounterId = data.id;
+      render(data);
+    }
+
+    async function addCombatant() {
+      const name = document.getElementById('cName').value;
+      const initiative = document.getElementById('cInit').value;
+      const maxHp = document.getElementById('cHp').value;
+      if (!name || !initiative || !maxHp) return alert('Fill in name, initiative, and HP');
+      await fetch(`/encounters/${currentEncounterId}/combatants`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, initiative: Number(initiative), max_hp: Number(maxHp) })
+      });
+      refresh();
+    }
+
+    async function damage(id) {
+      const amount = prompt('Damage amount:');
+      if (!amount) return;
+      await fetch(`/encounters/${currentEncounterId}/combatants/${id}/damage`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: Number(amount) })
+      });
+      refresh();
+    }
+
+    async function heal(id) {
+      const amount = prompt('Heal amount:');
+      if (!amount) return;
+      await fetch(`/encounters/${currentEncounterId}/combatants/${id}/heal`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: Number(amount) })
+      });
+      refresh();
+    }
+
+    async function nextTurn() {
+      await fetch(`/encounters/${currentEncounterId}/next-turn`, { method: 'POST' });
+      refresh();
+    }
+
+    async function refresh() {
+      const res = await fetch(`/encounters/${currentEncounterId}`);
+      render(await res.json());
+    }
+
+    function render(encounter) {
+      const view = document.getElementById('encounterView');
+      const current = encounter.current_turn;
+      view.innerHTML = `
+        <div class="card">
+          <h2>${encounter.name} <span class="round">Round ${encounter.round}</span></h2>
+          <div class="row">
+            <input id="cName" placeholder="Combatant name">
+            <input id="cInit" placeholder="Initiative" type="number" style="max-width:80px">
+            <input id="cHp" placeholder="Max HP" type="number" style="max-width:80px">
+            <button onclick="addCombatant()">Add</button>
+          </div>
+          <button onclick="nextTurn()">Next Turn ▶</button>
+          <div style="margin-top:12px">
+            ${encounter.combatants.map(c => `
+              <div class="combatant ${current && c.id === current.id ? 'current' : ''} ${!c.is_alive ? 'dead' : ''}">
+                <span>${c.name} (init ${c.initiative})</span>
+                <span class="hp-bar"><span class="hp-fill" style="width:${(c.current_hp / c.max_hp) * 100}%"></span></span>
+                <span>${c.current_hp}/${c.max_hp} HP</span>
+                <span>
+                  <button onclick="damage('${c.id}')">-HP</button>
+                  <button onclick="heal('${c.id}')">+HP</button>
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
