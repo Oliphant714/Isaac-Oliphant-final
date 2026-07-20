@@ -139,8 +139,8 @@ tag manually), trigger **Release** manually from the Actions tab
 - [ ] EC2 URL - from `terraform output app_url` in the Release workflow logs
 - [ ] Screenshot of the app running (open the EC2 URL in a browser, create
       an encounter, add a couple combatants, screenshot it)
-- [ ] Codebase URL - `https://github.com/byui-itm350-a2s26/{firstname}-{lastname}-final`
-- [ ] Docker Hub URL - `https://hub.docker.com/r/{your-dockerhub-username}/dnd-encounter-tracker`
+- [ ] Codebase URL - `https://github.com/byui-itm350-a2s26/Isaac-Oliphant-final`
+- [ ] Docker Hub URL - `https://hub.docker.com/r/isaacoliphant/dnd-encounter-tracker`
 
 ## Troubleshooting
 
