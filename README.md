@@ -156,3 +156,4 @@ tag manually), trigger **Release** manually from the Actions tab
   changes, which happens when the image tag variable changes. If you're
   reusing `:latest` for every build, the EC2 instance still needs the
   release workflow to run `terraform apply` again to trigger the redeploy.
+# Pipeline Verified
