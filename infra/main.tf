@@ -11,9 +11,9 @@ terraform {
   # Create this bucket once by hand (or via a bootstrap script) before first run.
   backend "s3" {
     # Fill these in - see README "One-time setup" section.
-    # bucket = "your-tfstate-bucket-name"
-    # key    = "dnd-encounter-tracker/terraform.tfstate"
-    # region = "us-east-1"
+    bucket = "iro-dnd-tracker-final-2026"
+    key    = "dnd-encounter-tracker/terraform.tfstate"
+    region = "us-east-1"
   }
 }
 
