@@ -83,8 +83,8 @@ the AWS Console/CLI directly (or ask your instructor if one is already
 provisioned for the class):
 
 ```bash
-aws s3api create-bucket --bucket <your-unique-bucket-name> --region us-east-1
-aws s3api put-bucket-versioning --bucket <your-unique-bucket-name> \
+aws s3api create-bucket --bucket iro-dnd-tracker-final --region us-east-1
+aws s3api put-bucket-versioning --bucket iro-dnd-tracker-final \
   --versioning-configuration Status=Enabled
 ```
 
